@@ -145,8 +145,6 @@ st.plotly_chart(fig4, use_container_width=True)
 st.caption(f"평점 5점: {rating_5_pct:.1f}% / 평점 1~3점: 0.75% — 변별력이 낮은 리뷰 시스템")
 
 st.markdown("#### 리뷰 텍스트 마이닝 — 평점별 키워드 비교")
-with st.spinner('텍스트 분석 중... (최초 1회 소요)'):
-    low_counter, high_counter = get_word_counters(reviews)
 
 col_wc1, col_wc2 = st.columns(2)
 with col_wc1:
