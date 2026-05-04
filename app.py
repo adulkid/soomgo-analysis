@@ -4,8 +4,7 @@ import numpy as np
 import plotly.express as px
 import platform
 import matplotlib.pyplot as plt
-from collections import Counter
-from kiwipiepy import Kiwi
+import pickle
 from wordcloud import WordCloud
 
 # ── 페이지 설정
@@ -54,23 +53,11 @@ pros, tags, reviews = load_data()
 
 # ── 텍스트 마이닝 캐싱
 @st.cache_data
-def get_word_counters(_reviews):
-    kiwi = Kiwi()
-    stopwords = ['없', '같', '있', '좋', '후', '때', '전', '일', '말', '이',
-                 '그', '수', '것', '더', '안', '못', '잘', '도', '만', '번']
-    def extract_words(text):
-        if not isinstance(text, str):
-            return []
-        tokens = kiwi.analyze(text)[0][0]
-        return [t.form for t in tokens if t.tag in ['NNG', 'VA', 'XR']]
-    low_r  = _reviews[_reviews['rating'] <= 3]['content'].dropna()
-    high_r = _reviews[_reviews['rating'] >= 4]['content'].dropna()
-    low_w, high_w = [], []
-    for text in low_r:  low_w.extend(extract_words(text))
-    for text in high_r: high_w.extend(extract_words(text))
-    low_f  = [w for w in low_w  if w not in stopwords and len(w) > 1]
-    high_f = [w for w in high_w if w not in stopwords and len(w) > 1]
-    return Counter(low_f), Counter(high_f)
+def get_word_counters():
+    with open('word_counters.pkl', 'rb') as f:
+        return pickle.load(f)
+
+low_counter, high_counter = get_word_counters()
 
 # ── KPI 계산
 total_hired  = pros['hired_count'].sum()
@@ -174,7 +161,7 @@ with col_wc1:
 with col_wc2:
     st.markdown("**높은 평점 (4~5점)**")
     wc_high = WordCloud(font_path=FONT_PATH, width=600, height=350,
-                        background_color='white', colormap='Purples').generate_from_frequencies(high_counter)
+                        background_color='white', colormap='Blues').generate_from_frequencies(high_counter)
     fig_wc2, ax2 = plt.subplots(figsize=(6, 3.5))
     ax2.imshow(wc_high); ax2.axis('off')
     st.pyplot(fig_wc2)
